@@ -19,8 +19,9 @@ class KPNetwork(object):
 
         self.N = np.zeros(shape=(n, 1))
 
-    def bogdanov_hebb(self):
-        return kpnet.utils.zero_diagonal(self.N * self.N.T)
+    def learning_rule(self):
+        BH = kpnet.utils.zero_diagonal(self.N * self.N.T)
+        return (1 - self.mu) * self.W0 + self.nu * BH
 
     def activation_function(self, x):
         return np.heaviside(x, 0)
@@ -38,11 +39,9 @@ class KPNetwork(object):
         self.x1 = (1 - self.A1) * self.x1 + self.B1 * self.N + self.C1 
         self.x2 = (1 - self.A2) * self.x2 - self.B2 * self.N + self.C2
 
-        BH = self.bogdanov_hebb()
-        self.W0 = (1 - self.mu) * self.W0 + self.nu * BH 
+        self.W0 = self.learning_rule() 
 
         return self.N
-
 
 class KPNetworkDelayed(KPNetwork):
     def __init__(self, n, m, alpha=0.2, beta=1.0):
@@ -50,14 +49,19 @@ class KPNetworkDelayed(KPNetwork):
         self.m = m
         self.D = np.zeros(shape=(m, n))
 
-    def bogdanov_hebb(self):
-        BH = self.N * np.sum(self.D, axis=0, keepdims=True) 
-
+    def learning_rule(self):
+        BH = kpnet.utils.zero_diagonal(self.N * np.sum(self.D, axis=0, keepdims=True))
         self.D = np.roll(self.D, self.m - 1, axis=0)
         self.D[self.m - 1] = self.N.reshape(self.n)
 
-        return kpnet.utils.zero_diagonal(BH)
+        return (1 - self.mu) * self.W0 + self.nu * BH
 
+class KPNetworkOja(KPNetwork):
+    def __init__(self, n, alpha=0.2, beta=1.0):
+        super(KPNetworkOja, self).__init__(n, alpha, beta)
+
+    def learning_rule(self):
+        return self.N * self.N.T * (1 - self.W0) - self.W0 
 
 class KPNetworkNormal(KPNetwork):
     def __init__(self, n, alpha=0.2, beta=1.0, sigma=1.0):
@@ -93,16 +97,16 @@ class KPNetworkTanh(KPNetwork):
         self.gamma = gamma
 
     def activation_function(self, x):
-        return np.tanh(self.gamma * x)
-
+        return (1 + np.tanh(self.gamma * x)) / 2.
 
 class KPNetworkTanhDelayed(KPNetworkDelayed):
     def __init__(self, n, m, alpha=0.2, beta=1.0, gamma=0.1):
         super(KPNetworkTanhDelayed, self).__init__(n, m, alpha, beta)
+        self.h = 2 * np.ones(shape=(n, 1))
         self.gamma = gamma
 
     def activation_function(self, x):
-        return np.tanh(self.gamma * x)
+        return  (1 + np.tanh(self.gamma * x)) / 2.
 
 
 class KPNetworkSigmoidDelayed(KPNetworkDelayed):
