@@ -1,1 +1,2 @@
 # neurodyn
+Master Thesis project.
