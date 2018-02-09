@@ -47,7 +47,7 @@ class TraceCallback(OutputCallback):
         self.matrix_deg = matrix_deg
 
     def compute(self, network, step): 
-        self.result[0, step] = np.trace(np.linalg.matrix_power(np.absolute(network.W0 / self.norm) > 0.5, self.matrix_deg))
+        self.result[0, step] = np.trace(np.linalg.matrix_power((network.W0 / self.norm) >= 0.8, self.matrix_deg))
 
 class Weight0Callback(OutputCallback):
     def __init__(self, time_interval, neuron_1, neuron_2):
