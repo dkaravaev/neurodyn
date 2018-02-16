@@ -127,6 +127,7 @@ class KPNetworkTanh(KPNetwork):
     def __init__(self, n, alpha=0.2, beta=1.0, gamma=0.1):
         super(KPNetworkTanh, self).__init__(n, alpha, beta)
         self.gamma = gamma
+        self.h = 1 * np.ones(shape=(n, 1))
 
     def activation_function(self, x):
         return (1 + np.tanh(self.gamma * x)) / 2.

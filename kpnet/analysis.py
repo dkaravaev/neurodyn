@@ -1,11 +1,26 @@
 import pywt
+import wavelets
 import scipy.stats
 import numpy as np
+
+
+def wdist_cwt(signal):
+    P = wavelets.WaveletAnalysis(signal, wavelet=wavelets.Ricker()).wavelet_power
+    return np.sum(P, axis=0) / np.sum(P)
+
+def wentropy_cwt(signal):
+    return scipy.stats.entropy(wdist_cwt(signal))
+
+def wentropy_cwtd(signal, step):
+    we = np.zeros(signal.shape[0])
+    for i in range(int(we.shape[0] / step)):
+        we[i * step : (i + 1) * step] = wentropy_cwt(signal[i * step : (i + 1) * step])
+    return we
 
 def wdist(signal, wname):
     level = pywt.dwt_max_level(signal.shape[0], pywt.Wavelet(wname))
     C = pywt.wavedec(signal, wname, level=level)
-    d = [np.mean(c ** 2) for c in C]
+    d = [np.mean(C[i] ** 2) for i in range(1, level + 1)]
     return d / np.sum(d)
 
 def wentropy(signal, wname):
