@@ -58,6 +58,14 @@ class Weight0Callback(OutputCallback):
     def compute(self, network, step):
         self.result[0, step] = network.W0[self.i, self.j]
 
+class WeightsCallback(OutputCallback):
+    def __init__(self, time_interval, neurons):
+        super(WeightsCallback, self).__init__(time_interval)
+        self.result = np.zeros(shape=(neurons, neurons, time_interval))
+
+    def compute(self, network, step):
+        self.result[:, :, step] = network.W0
+
 class WeightCallback(OutputCallback):
     def __init__(self, time_interval, neuron_1, neuron_2):
         super(WeightCallback, self).__init__(time_interval)

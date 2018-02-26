@@ -8,8 +8,11 @@ class WaveletEntropy:
     @staticmethod
     def distribution(matrix, axis=1):
         d = np.mean(matrix, axis=axis)
-        return d / np.sum(d)
-    
+        norm = np.sum(d)
+        if norm != 0.0:
+            return d
+        return d / norm
+
     @staticmethod
     def weighted_distribution(matrix, axis=1):
         d = np.flip(np.arange(1, matrix.shape[0] + 1), axis=-1) * np.sum(matrix, axis=axis)
@@ -40,10 +43,9 @@ class WaveletEntropy:
     
     def __init__(self, power_matrix):
         self.power_matrix  = power_matrix
-    
-    @property
-    def overall(self):
-        return self.entropy(self.distribution(self.power_matrix, axis=1))
+
+    def overall(self, fd, fe):
+        return self.fe(self.fd(self.power_matrix, axis=1))
 
     def sliced(self, step, fd, fe):
         result = np.zeros(self.power_matrix.shape[1])
@@ -53,9 +55,9 @@ class WaveletEntropy:
         return result
     
     @staticmethod
-    def compare(ep, eq, fd, fe):
-        ps = fd(ep.power_matrix)
-        qs = fd(eq.power_matrix)
+    def compare(ep, eq, fd, fe, start=0, stop=-1):
+        ps = fd(ep.power_matrix[start:stop])
+        qs = fd(eq.power_matrix[start:stop])
         return fe(ps, qs)
     
     @staticmethod
@@ -87,9 +89,3 @@ class EntropySWT(WaveletEntropy):
         power_matrix = np.asarray([d ** 2 for _, d in pywt.swt(signal, wavelet, level=level)])
         super(EntropySWT, self).__init__(power_matrix)
 
-
-class EntropyDWT(WaveletEntropy):
-    def __init__(self, signal, wavelet):
-        level = pywt.dwt_max_level(signal.shape[0])
-        power_matrix = np.asarray([d ** 2 for d in pywt.dwt(signal, wavelet, level=level)[1:]])
-        super(EntropySWT, self).__init__(power_matrix)
