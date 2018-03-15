@@ -11,6 +11,20 @@ class OutputCallback(object):
     def compute(self, network, step):
         pass
 
+class NormL1Callback(OutputCallback):
+    def __init__(self, time_interval):
+        super(NormL1Callback, self).__init__(time_interval)
+
+    def compute(self, network, step):
+        self.result[0, step] = np.sum(np.absolute(network.W0))
+
+class NormL2Callback(OutputCallback):
+    def __init__(self, time_interval):
+        super(NormL2Callback, self).__init__(time_interval)
+
+    def compute(self, network, step):
+        self.result[0, step] = np.sum(np.absolute(network.W0 ** 2))
+
 class TotalActivityCallback(OutputCallback):
     def __init__(self, time_interval):
         super(TotalActivityCallback, self).__init__(time_interval)

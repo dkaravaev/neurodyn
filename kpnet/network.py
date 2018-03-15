@@ -34,7 +34,8 @@ class KPNetwork(object):
         c = 1
         if norm != 0:
             c = 1. / norm 
-        self.P = (1 - self.alpha) * self.P + c * np.dot(self.W, self.N) - self.beta * self.N + S 
+        self.P = (1 - self.alpha) * self.P + c * np.dot(self.W, self.N) - self.beta * self.N + S + np.random.normal(0, 1)
+ 
             
         self.x1 = (1 - self.A1) * self.x1 + self.B1 * self.N + self.C1 
         self.x2 = (1 - self.A2) * self.x2 - self.B2 * self.N + self.C2
@@ -127,10 +128,10 @@ class KPNetworkTanh(KPNetwork):
     def __init__(self, n, alpha=0.2, beta=1.0, gamma=0.1):
         super(KPNetworkTanh, self).__init__(n, alpha, beta)
         self.gamma = gamma
-        self.h = 1 * np.ones(shape=(n, 1))
+        self.h = 1 + np.zeros(shape=(n, 1))
 
     def activation_function(self, x):
-        return (1 + np.tanh(self.gamma * x)) / 2.
+        return (1 + np.tanh(self.gamma * x)) / 2
 
 class KPNetworkTanhDelayed(KPNetworkDelayed):
     def __init__(self, n, m, alpha=0.2, beta=1.0, gamma=0.1):
