@@ -1,3 +1,5 @@
+import h5py
+
 import numpy as np
 import networkx as nx
 import scipy.stats
@@ -73,13 +75,24 @@ class Weight0Callback(OutputCallback):
         self.result[0, step] = network.W0[self.i, self.j]
 
 class WeightsCallback(OutputCallback):
-    def __init__(self, time_interval, neurons):
+    def __init__(self, time_interval, neurons, chunk, filename):
         super(WeightsCallback, self).__init__(time_interval)
-        self.result = np.zeros(shape=(neurons, neurons, time_interval))
+        self.chunk  = chunk
+        self.slice  = np.zeros(shape=(neurons, neurons, chunk))
+        self.f      = h5py.File(filename, 'w')
+        self.dest   = self.f.create_dataset("W", (neurons, neurons, time_interval), dtype='float32')
+        self.result = None
+        self.chunks = 0
 
     def compute(self, network, step):
-        self.result[:, :, step] = network.W0
-
+        if step != 0 and step % self.chunk == 0:
+            self.dest[:, :, self.chunks * self.chunk : (self.chunks + 1) * self.chunk] = self.slice
+            self.chunks += 1
+        self.slice[:, :, step % self.chunk] = network.W0
+    
+    def __del__(self):
+        self.f.close()
+        
 class WeightCallback(OutputCallback):
     def __init__(self, time_interval, neuron_1, neuron_2):
         super(WeightCallback, self).__init__(time_interval)

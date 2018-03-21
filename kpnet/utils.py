@@ -15,7 +15,7 @@ def moving_average(a, n=500) :
 
 
 def plot_cwt(ax, signal, wavelet):
-    wa = WaveletAnalysis(signal, wavelet=wavelet)
+    wa = wavelets.WaveletAnalysis(signal, wavelet=wavelet)
     Time, Scale = np.meshgrid(wa.time, wa.scales)
     CS = ax.contourf(Time, Scale, wa.wavelet_power, 100)
 
