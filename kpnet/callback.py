@@ -9,7 +9,8 @@ import kpnet.utils
 class OutputCallback(object):
     def __init__(self, time_interval):
         self.result = np.zeros(shape=(1, time_interval))
-
+        self.time_interval = time_interval
+        
     def compute(self, network, step):
         pass
 
@@ -85,11 +86,11 @@ class WeightsCallback(OutputCallback):
         self.chunks = 0
 
     def compute(self, network, step):
-        if step != 0 and step % self.chunk == 0:
+        if (step % self.chunk == 0 and step != 0) or (step == self.time_interval - 1):
             self.dest[:, :, self.chunks * self.chunk : (self.chunks + 1) * self.chunk] = self.slice
             self.chunks += 1
         self.slice[:, :, step % self.chunk] = network.W0
-    
+
     def __del__(self):
         self.f.close()
         
