@@ -1,77 +1,49 @@
 import pywt
 import wavelets
-import scipy.stats
 import numpy as np
+import scipy.stats
 
 
-class WaveletEntropy:
-    @staticmethod
-    def distribution(matrix, axis=1):
-        d = np.mean(matrix, axis=axis)
-        norm = np.sum(d)
-        if norm != 0.0:
-            return d
-        return d / norm
+class WTDistribution(object):
+    def __init__(self):
+        self.value = None
 
-    @staticmethod
-    def weighted_distribution(matrix, axis=1):
-        d = np.flip(np.arange(1, matrix.shape[0] + 1), axis=-1) * np.sum(matrix, axis=axis)
-        return d / np.sum(d)
+    @property
+    def entropy(self):
+        return scipy.stats.entropy(self.value)
     
-    @staticmethod
-    def unnormalized_distribution(matrix, axis=1):
-        d = np.mean(matrix, axis=axis)
-        ind = np.argwhere(d == 0)
-        d = np.delete(d, ind)
-        return d
+    @property
+    def moda(self):
+        return np.argmax(self.value)
     
-    @staticmethod
-    def raw(ps, axis=1):
-        return -np.sum(ps * np.log(ps))
+    def divergence(self, other):
+        return scipy.stats.entropy(self.value, other.value)
     
-    @staticmethod
-    def shannon(ps):
-        return scipy.stats.entropy(ps)
-    
-    @staticmethod
-    def divergence(ps, qs):
-        return scipy.stats.entropy(ps, qs)
-    
-    @staticmethod
-    def jensen(ps, qs):
-        return .5 * (WaveletEntropy.divergence(ps, qs) + WaveletEntropy.divergence(qs, ps))
-    
-    def __init__(self, power_matrix):
-        self.power_matrix  = power_matrix
+    def jensen(self, other):
+        return .5 * (self.divergence(other) + other.divergence(self))
 
-    def overall(self, fd, fe):
-        return self.fe(self.fd(self.power_matrix, axis=1))
 
-    def sliced(self, step, fd, fe):
-        result = np.zeros(self.power_matrix.shape[1])
-        for i in range(int(result.shape[0] / step)):
-            ps = fd(self.power_matrix[:, i * step : (i + 1) * step])
-            result[i * step : (i + 1) * step] = fe(ps)
-        return result
-    
-    @staticmethod
-    def compare(ep, eq, fd, fe, start=0, stop=-1):
-        ps = fd(ep.power_matrix[start:stop])
-        qs = fd(eq.power_matrix[start:stop])
-        return fe(ps, qs)
-    
-    @staticmethod
-    def compare_sliced(step, ep, eq, fd, fe):
-        result = np.zeros(ep.power_matrix.shape[1])
-        for i in range(int(result.shape[0] / step)):
-            ps = fd(ep.power_matrix[:, i * step : (i + 1) * step])
-            qs = fd(eq.power_matrix[:, i * step : (i + 1) * step])
-            result[i * step : (i + 1) * step] = fe(ps, qs)
-        return result
-        
-    
-class EntropyCWT(WaveletEntropy):
+class DWTDistribution(WTDistribution):
     def __init__(self, signal, wavelet):
+        super(DWTDistribution, self).__init__()
+        level = pywt.dwt_max_level(signal.shape[0], pywt.Wavelet(wavelet).dec_len)
+        dwt = pywt.wavedec(signal, wavelet, level=level)
+        self.value = np.flip(np.asarray([np.sum(coeffs ** 2) for coeffs in dwt]), axis=-1)
+        self.value /= np.sum(self.value)
+
+
+class SWTDistribution(WTDistribution):
+    def __init__(self, signal, wavelet):
+        super(SWTDistribution, self).__init__()
+        self.level = pywt.swt_max_level(signal.shape[0])
+        self.swt   = np.asarray([D ** 2  for _, D in pywt.swt(signal, wavelet, level=self.level)])
+        self.value = np.flip(np.sum(self.swt, axis=1) / np.sum(self.swt), axis=-1)
+
+
+class CWTDistribution(WTDistribution):
+    # todo: optimize coi mapping
+    def __init__(self, signal, wavelet):
+        super(CWTDistribution, self).__init__()
         wa = wavelets.WaveletTransform(signal, wavelet=wavelet)
         coi = wa.wavelet.coi
         s = wa.scales
@@ -80,12 +52,5 @@ class EntropyCWT(WaveletEntropy):
         inside_coi = (coi(S) < T) & (T < (T.max() - coi(S)))
         masked_power = np.ma.masked_where(~inside_coi, wa.wavelet_power)
         masked_power.set_fill_value(0)
-        super(EntropyCWT, self).__init__(masked_power.filled())
-
-
-class EntropySWT(WaveletEntropy):
-    def __init__(self, signal, wavelet):
-        level = pywt.swt_max_level(signal.shape[0])
-        power_matrix = np.asarray([d ** 2 for _, d in pywt.swt(signal, wavelet, level=level)])
-        super(EntropySWT, self).__init__(power_matrix)
+        self.value = np.sum(masked_power.filled(), axis=1) / np.sum(masked_power.filled()) 
 
