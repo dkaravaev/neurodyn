@@ -2,20 +2,20 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
+
 class WTClustering:
     def __init__(self, W, pattern, distclass, wavelet):
-        self.W              = W
-        self.N              = self.W.shape[0]
+        self.W = W
+        self.N = self.W.shape[0]
 
-        self.pattern        = pattern
-        self.distclass      = distclass
-        self.wavelet        = wavelet
+        self.pattern   = pattern
+        self.distclass = distclass
+        self.wavelet   = wavelet
 
-        self.pdist          = self.distclass(pattern, self.wavelet)
+        self.pdist = self.distclass(pattern, self.wavelet)
 
-        self.clusters       = []
-
-        self.adj_matrix     = np.zeros(shape=(self.N, self.N))
+        self.clusters = []
+        self.adj_matrix = np.zeros(shape=(self.N, self.N))
 
     @staticmethod
     def connected(dist1, dist2, epsilon, delta):
@@ -58,7 +58,7 @@ class WTClustering:
         plt.figure(figsize=figsize)
         pos = nx.kamada_kawai_layout(G)
         nx.draw_networkx_nodes(G, pos, node_color = node_colors, alpha = 0.7, node_size = 500)
-        nx.draw_networkx_labels(G, pos, {i: str(i) for i in range(N)})
+        nx.draw_networkx_labels(G, pos, {i: str(i) for i in range(self.N)})
         nx.draw_networkx_edges(G, pos, edge_color='gray')
         plt.xticks([])
         plt.yticks([])
