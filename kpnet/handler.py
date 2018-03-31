@@ -11,13 +11,7 @@ class ComputationHandler(object):
                 callbacks[function].compute(network, step)
 
         for function in callbacks.keys():
-            if callbacks[function].result != None:
-                results[function] = callbacks[function].result.squeeze()
-
-        results['alpha'] = network.alpha
-        results['beta']  = network.beta
-        # results['gamma'] = network.gamma
-        results['n']     = network.n
+            results[function] = callbacks[function].result.squeeze()
 
         return results
 

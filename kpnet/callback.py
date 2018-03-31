@@ -82,7 +82,7 @@ class WeightsCallback(OutputCallback):
         self.slice  = np.zeros(shape=(neurons, neurons, chunk))
         self.f      = h5py.File(filename, 'w')
         self.dest   = self.f.create_dataset("W", (neurons, neurons, time_interval), dtype='float32')
-        self.result = None
+        self.result = np.zeros(shape=(time_interval,))
         self.chunks = 0
 
     def compute(self, network, step):

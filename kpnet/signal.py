@@ -57,19 +57,7 @@ class SwitchSignal(Signal):
             else:
                 print("Error! Returning zeros.")
                 return np.zeros(shape=(neurons, 1))
-
-
-    def __getitem__(self, step):
-        if step <= self.timestamps[self.timestamp_index]:
-            return self.signals[self.timestamp_index][step]
-        else:
-            if self.timestamp_index != len(self.timestamps) - 1: 
-                self.timestamp_index += 1
-                return self.signals[self.timestamp_index][step]
-            else:
-                print("Error! Returning zeros.")
-                return np.zeros(shape=(neurons, 1))
-
+                
 
 class PatternSignal(Signal):
     def __init__(self, neurons, patterns):

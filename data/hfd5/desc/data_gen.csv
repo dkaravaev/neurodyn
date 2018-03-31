@@ -1,0 +1,11 @@
+Filename,N,alpha,beta,gamma
+cluster1.hfd5,64,0.05,0.3,2.2
+cluster2.hfd5,64,0.05,0.25,2.2
+cluster3.hfd5,64,0.125,0.001,2.2
+cluster4.hfd5,64,0.125,0.0012,2.2
+cluster5.hfd5,64,0.06,0.09,2.2
+trans1.hfd5,64,0.2,0.4,2.2
+trans2.hfd5,64,0.125,0.0015,2.2
+trans3.hfd5,64,0.1,0.0015,2.2
+period1.hfd5,64,0.4,0.4,2.2
+period2.hfd5,64,0.2,0.028,2.2

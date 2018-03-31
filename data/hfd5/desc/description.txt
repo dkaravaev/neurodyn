@@ -1,0 +1,11 @@
+File:           Parameters:
+cluster1.hfd5   N = 64, alpha = 0.05,  beta = 0.3,    gamma = 2.2
+cluster2.hfd5   N = 64, alpha = 0.05,  beta = 0.25,   gamma = 2.2
+cluster3.hfd5   N = 64, alpha = 0.125, beta = 0.001,  gamma = 2.2
+cluster4.hfd5   N = 64, alpha = 0.125, beta = 0.0012, gamma = 2.2
+cluster5.hfd5   N = 64, alpha = 0.06,  beta = 0.09,   gamma = 2.2
+trans1.hfd5     N = 64, alpha = 0.2,   beta = 0.4,    gamma = 2.2
+trans2.hfd5     N = 64, alpha = 0.125, beta = 0.0015, gamma = 2.2
+trans3.hfd5     N = 64, alpha = 0.1,   beta = 0.0015, gamma = 2.2
+period1.hfd5    N = 64, alpha = 0.4,   beta = 0.4,    gamma = 2.2
+period2.hfd5    N = 64, alpha = 0.2,   beta = 0.028, gamma = 2.2
