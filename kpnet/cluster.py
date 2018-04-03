@@ -15,7 +15,7 @@ class WTClustering:
         self.pdist = self.distclass(pattern, self.wavelet)
 
         self.clusters = []
-        self.adj_matrix = np.zeros(shape=(self.N, self.N))
+        
 
     @staticmethod
     def connected(dist1, dist2, epsilon, delta):
@@ -23,6 +23,16 @@ class WTClustering:
         moda_cond = dist1.moda == dist2.moda
         dist_cond = np.abs(dist1.value[dist1.moda] - dist2.value[dist2.moda]) <= delta
         return ent_cond and moda_cond and dist_cond
+
+
+    def to_adjmatrix(self):
+        adj_matrix = np.zeros(shape=(self.N, self.N))
+        for cluster in self.clusters:
+            for elem1 in cluster:
+                for elem2 in cluster:
+                    if elem2 != elem1:
+                        adj_matrix[elem2, elem1] = 1
+        return adj_matrix 
 
     def run(self, begin, end, epsilon, delta):
         self.clusters = []
@@ -34,8 +44,6 @@ class WTClustering:
                     if not visited[j] and j != i:
                         jdist = self.distclass(self.W[i, j, begin : end], self.wavelet)
                         if self.connected(jdist, self.pdist, epsilon, delta):
-                            self.adj_matrix[i, j] = 1
-                            self.adj_matrix[j, i] = 1
                             visited[j] = True
                             cluster.append(j)
 
@@ -45,7 +53,6 @@ class WTClustering:
                     
         return self.clusters
 
-
     def plot(self, figsize):
         node_colors = [0.5] * self.N
         color_shift = 0.2
@@ -54,7 +61,7 @@ class WTClustering:
                 node_colors[elem] = color_shift
             color_shift += 0.2
         
-        G = nx.from_numpy_matrix(self.adj_matrix)        
+        G = nx.from_numpy_matrix(self.to_adjmatrix())        
         plt.figure(figsize=figsize)
         pos = nx.kamada_kawai_layout(G)
         nx.draw_networkx_nodes(G, pos, node_color = node_colors, alpha = 0.7, node_size = 500)
