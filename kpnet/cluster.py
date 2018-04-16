@@ -69,4 +69,5 @@ class WTClustering:
         nx.draw_networkx_edges(G, pos, edge_color='gray')
         plt.xticks([])
         plt.yticks([])
+        plt.axis('off')
         plt.show()
