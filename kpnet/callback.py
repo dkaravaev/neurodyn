@@ -6,6 +6,7 @@ import scipy.stats
 
 import kpnet.utils
 
+
 class OutputCallback(object):
     def __init__(self, time_interval):
         self.result = np.zeros(shape=(1, time_interval))
@@ -142,6 +143,29 @@ class EingValues(OutputCallback):
         self.result[0, step] = network._eig[self.neuron];
 
  
+class ClusterCoeffCallback(OutputCallback):
+    def __init__(self, time_interval):
+        super(ClusterCoeffCallback, self).__init__(time_interval)
+
+    def compute(self, network, step):
+        M = (network.N.T * network.N) > 0.5 
+        M2 = np.dot(M, M)
+        M3 = np.dot(M, M2)
+        num = np.trace(M3)
+        denom = 9 * (np.sum(M2) - np.trace(M2))
+        if denom == 0:
+            self.result[0, step] = 0
+        else:
+            self.result[0, step] = num / denom
+
+class TotalDegreeCallback(OutputCallback):
+    def __init__(self, time_interval):
+        super(TotalDegreeCallback, self).__init__(time_interval)
+
+    def compute(self, network, step):
+        M = (network.N.T * network.N) > 0.5 
+        self.result[0, step] = np.trace(np.dot(M, M))
+
 class AverageClusteringCoeff(OutputCallback):
     def __init__(self, time_interval, threshold):
         super(AverageClusteringCoeff, self).__init__(time_interval)
@@ -154,4 +178,3 @@ class AverageClusteringCoeff(OutputCallback):
             self.result[0, step] = np.mean(nx.clustering(nx.Graph(adj)).values())
         else:
             self.result[0, step] = 0
- 

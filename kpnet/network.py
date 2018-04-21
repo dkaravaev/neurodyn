@@ -19,9 +19,11 @@ class KPNetwork(object):
 
         self.N = np.zeros(shape=(n, 1))
 
+        self.BH = np.zeros(shape=(n, n))
+
     def learning_rule(self):
-        BH = kpnet.utils.zero_diagonal(self.N * self.N.T)
-        return (1 - self.mu) * self.W0 + self.nu * BH
+        self.BH = kpnet.utils.zero_diagonal(self.N * self.N.T)
+        return (1 - self.mu) * self.W0 + self.nu * self.BH
 
     def activation_function(self, x):
         return np.heaviside(x, 0)
@@ -51,11 +53,14 @@ class KPNetworkDelayed(KPNetwork):
         self.D = np.zeros(shape=(m, n))
 
     def learning_rule(self):
-        BH = self.N * np.sum(self.D, axis=0, keepdims=True)
         self.D = np.roll(self.D, self.m - 1, axis=0)
         self.D[self.m - 1] = self.N.reshape(self.n)
 
-        return kpnet.utils.zero_diagonal((1 - self.mu) * self.W0 + self.nu * BH)
+        avg = np.sum(self.D, axis=0, keepdims=True)        
+
+        self.BH = avg.T * avg
+
+        return kpnet.utils.zero_diagonal((1 - self.mu) * self.W0 + self.nu * self.BH)
 
 class KPNetworkOja(KPNetwork):
     def __init__(self, n, alpha=0.2, beta=1.0, gamma=0.1):
