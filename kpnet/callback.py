@@ -148,10 +148,10 @@ class ClusterCoeffCallback(OutputCallback):
         super(ClusterCoeffCallback, self).__init__(time_interval)
 
     def compute(self, network, step):
-        M = (network.N.T * network.N) > 0.5 
-        M2 = np.dot(M, M)
-        M3 = np.dot(M, M2)
-        num = np.trace(M3)
+        M     = kpnet.utils.zero_diagonal(np.asarray((network.N.T * network.N) > 0.5, dtype='int32'))
+        M2    = np.dot(M, M)
+        M3    = np.dot(M, M2)
+        num   = np.trace(M3)
         denom = 9 * (np.sum(M2) - np.trace(M2))
         if denom == 0:
             self.result[0, step] = 0
@@ -163,7 +163,7 @@ class TotalDegreeCallback(OutputCallback):
         super(TotalDegreeCallback, self).__init__(time_interval)
 
     def compute(self, network, step):
-        M = (network.N.T * network.N) > 0.5 
+        M = kpnet.utils.zero_diagonal(np.asarray((network.N.T * network.N) > 0.5, dtype='int32'))
         self.result[0, step] = np.trace(np.dot(M, M))
 
 class AverageClusteringCoeff(OutputCallback):
