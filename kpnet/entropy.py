@@ -36,7 +36,7 @@ class SWTDistribution(WTDistribution):
     def __init__(self, signal, wavelet):
         super(SWTDistribution, self).__init__()
         self.level = pywt.swt_max_level(signal.shape[0])
-        self.swt   = np.asarray([D ** 2  for _, D in pywt.swt(signal, wavelet, level=self.level)])
+        self.swt = np.asarray([D ** 2  for _, D in pywt.swt(signal, wavelet, level=self.level)])
         self.value = np.flip(np.sum(self.swt, axis=1) / np.sum(self.swt), axis=-1)
 
 

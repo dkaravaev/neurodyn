@@ -140,7 +140,7 @@ class EingValues(OutputCallback):
         self.neuron = neuron
 
     def compute(self, network, step):
-        self.result[0, step] = network._eig[self.neuron];
+        self.result[0, step] = network._eig[self.neuron]
 
  
 class ClusterCoeffCallback(OutputCallback):

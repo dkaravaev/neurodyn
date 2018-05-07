@@ -24,6 +24,11 @@ class WTClustering:
         dist_cond = np.abs(dist1.value[dist1.moda] - dist2.value[dist2.moda]) <= delta
         return ent_cond and moda_cond and dist_cond
 
+    def union(self, other):
+        for sc in self.clusters:
+            for oc in other.clusters:
+                if not sc.isdisjoint(oc):
+                    sc.union(oc)
 
     def to_adjmatrix(self):
         adj_matrix = np.zeros(shape=(self.N, self.N))
@@ -32,6 +37,8 @@ class WTClustering:
                 for elem2 in cluster:
                     if elem2 != elem1:
                         adj_matrix[elem2, elem1] = 1
+                        adj_matrix[elem1, elem2] = 1
+
         return adj_matrix 
 
     def run(self, begin, end, epsilon, delta):
@@ -39,16 +46,17 @@ class WTClustering:
         visited = [False] * self.N
         for i in range(self.N):
             if not visited[i]:
-                cluster = []
+                cluster = set()
                 for j in range(self.N):
                     if not visited[j] and j != i:
                         jdist = self.distclass(self.W[i, j, begin : end], self.wavelet)
                         if self.connected(jdist, self.pdist, epsilon, delta):
                             visited[j] = True
-                            cluster.append(j)
+                            cluster.add(j)
 
                 if len(cluster) > 0:
-                    self.clusters.append(cluster + [i])
+                    cluster.add(i)
+                    self.clusters.append(cluster)
                     visited[i] = True
                     
         return self.clusters
