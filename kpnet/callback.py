@@ -158,6 +158,13 @@ class ClusterCoeffCallback(OutputCallback):
         else:
             self.result[0, step] = num / denom
 
+class TotalActivityCallback(OutputCallback):
+    def __init__(self, time_interval):
+        super(TotalActivityCallback, self).__init__(time_interval)
+
+    def compute(self, network, step):
+        self.result[0, step] = np.sum(network.N)
+
 class TotalDegreeCallback(OutputCallback):
     def __init__(self, time_interval):
         super(TotalDegreeCallback, self).__init__(time_interval)
